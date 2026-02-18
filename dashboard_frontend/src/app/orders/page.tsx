@@ -1,57 +1,56 @@
+"use client";
+
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import StatCard from "@/components/StatCard";
 import Card from "@/components/Card";
-import { dashboardStats, mockOrders } from "@/data/mockData";
+import { mockOrders, Order } from "@/data/mockData";
 
 // PUBLIC_INTERFACE
 /**
- * Main dashboard page displaying analytics and recent activity
+ * Orders page displaying all customer orders with filtering
  */
-export default function Home() {
-  const recentOrders = mockOrders.slice(0, 5);
+export default function OrdersPage() {
+  const [filter, setFilter] = useState<string>("all");
+  const [orders] = useState<Order[]>(mockOrders);
+
+  const filteredOrders =
+    filter === "all" ? orders : orders.filter((order) => order.status === filter);
+
+  const statusCounts = {
+    all: orders.length,
+    pending: orders.filter((o) => o.status === "pending").length,
+    processing: orders.filter((o) => o.status === "processing").length,
+    completed: orders.filter((o) => o.status === "completed").length,
+    cancelled: orders.filter((o) => o.status === "cancelled").length,
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-[#111827] mb-2">Dashboard Analytics</h2>
-          <p className="text-[#6B7280]">Welcome back! Here&apos;s what&apos;s happening today.</p>
+          <h2 className="text-2xl font-bold text-[#111827] mb-2">Orders</h2>
+          <p className="text-[#6B7280]">Manage and track all customer orders.</p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Revenue"
-            value={`$${dashboardStats.totalRevenue.toLocaleString()}`}
-            change={dashboardStats.revenueChange}
-            changeType="positive"
-            icon="💰"
-          />
-          <StatCard
-            title="Total Orders"
-            value={dashboardStats.totalOrders.toLocaleString()}
-            change={dashboardStats.ordersChange}
-            changeType="positive"
-            icon="📦"
-          />
-          <StatCard
-            title="Total Customers"
-            value={dashboardStats.totalCustomers.toLocaleString()}
-            change={dashboardStats.customersChange}
-            changeType="positive"
-            icon="👥"
-          />
-          <StatCard
-            title="Avg Order Value"
-            value={`$${dashboardStats.averageOrderValue}`}
-            change={dashboardStats.avgOrderChange}
-            changeType="positive"
-            icon="📊"
-          />
+        {/* Filter Tabs */}
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(statusCounts).map(([status, count]) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filter === status
+                  ? "bg-[#111827] text-white"
+                  : "bg-white text-[#6B7280] border border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
+            </button>
+          ))}
         </div>
 
-        {/* Recent Orders */}
-        <Card title="Recent Orders">
+        {/* Orders Table */}
+        <Card>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -62,10 +61,11 @@ export default function Home() {
                   <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B7280]">Amount</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B7280]">Status</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B7280]">Date</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-[#6B7280]">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
+                {filteredOrders.map((order) => (
                   <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm font-medium text-[#111827]">{order.id}</td>
                     <td className="py-3 px-4 text-sm text-[#111827]">{order.customer}</td>
@@ -89,6 +89,11 @@ export default function Home() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-sm text-[#6B7280]">{order.date}</td>
+                    <td className="py-3 px-4">
+                      <button className="text-[#16A34A] hover:text-[#15803D] text-sm font-medium">
+                        View
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
