@@ -1,45 +1,60 @@
 import React from "react";
+import { TrendingUp, TrendingDown, Minus, LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   change?: string;
   changeType?: "positive" | "negative" | "neutral";
-  icon?: string;
+  icon?: LucideIcon;
+  iconBgColor?: string;
 }
 
 // PUBLIC_INTERFACE
 /**
- * Statistical card component for displaying key metrics
+ * Modern statistical card component with icons, gradients, and trend indicators
  */
 export default function StatCard({
   title,
   value,
   change,
   changeType = "neutral",
-  icon,
+  icon: Icon,
+  iconBgColor = "from-[#16A34A] to-[#15803D]",
 }: StatCardProps) {
   const changeColor =
     changeType === "positive"
-      ? "text-[#16A34A]"
+      ? "text-[#16A34A] bg-green-50"
       : changeType === "negative"
-      ? "text-[#EF4444]"
-      : "text-[#6B7280]";
+      ? "text-[#EF4444] bg-red-50"
+      : "text-[#6B7280] bg-gray-50";
+
+  const TrendIcon =
+    changeType === "positive"
+      ? TrendingUp
+      : changeType === "negative"
+      ? TrendingDown
+      : Minus;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-[#6B7280] mb-1">{title}</p>
-          <p className="text-3xl font-bold text-[#111827]">{value}</p>
-          {change && (
-            <p className={`text-sm mt-2 ${changeColor}`}>
-              {changeType === "positive" ? "↑" : changeType === "negative" ? "↓" : "→"} {change}
-            </p>
-          )}
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 group">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-[#6B7280] mb-1">{title}</p>
+          <p className="text-3xl font-bold text-[#111827] tracking-tight">{value}</p>
         </div>
-        {icon && <span className="text-3xl">{icon}</span>}
+        {Icon && (
+          <div className={`w-12 h-12 bg-gradient-to-br ${iconBgColor} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+        )}
       </div>
+      {change && (
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${changeColor}`}>
+          <TrendIcon className="w-4 h-4" />
+          <span>{change}</span>
+        </div>
+      )}
     </div>
   );
 }
